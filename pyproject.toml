@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mine-de-rien"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "pyftdi>=0.54",
+]
+
+[project.scripts]
+train-controller = "train_controller.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["train_controller"]
