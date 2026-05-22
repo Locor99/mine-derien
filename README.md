@@ -1,243 +1,216 @@
 # Mine Derien — Système de commande de trains miniatures
 
-Projet développé par un ingénieur électrique pour contrôler un réseau de trains miniatures via port parallèle depuis un PC sous QBasic. Le code original (`initial_basic_program.bas`) date de 2008–2009 (référence interne `MD0809023`).
+Réseau de trains miniatures « Mine Derien et Port Rienafer » (réf. `MD0809023`),
+conçu en 2008–2009 par un ingénieur électrique. Le réseau était piloté par un PC
+sous QBasic via le port parallèle ; ce PC est aujourd'hui hors d'usage.
 
-L'objectif actuel est de moderniser la plateforme logicielle et matérielle côté ordinateur, tout en conservant l'interface électrique existante côté trains.
+Ce projet remplace le PC par un **Arduino Mega 2560** qui pilote directement le
+module électronique des trains, observé et configuré depuis une **UI Python** par
+liaison série USB. Le matériel des trains (module, voie, câblage) reste inchangé.
 
----
-
-## Modernisation en cours
-
-Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/mine_derien/`) qui pilote directement le module électronique des trains. Une **UI Python** (`python/`) communique avec le Mega par liaison série USB pour le configurer et l'observer.
-
-Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
-
-**État courant : étape A11 terminée — phase A complète.** L'UI a un onglet « Auto » : champs fréquence/duty, démarrage/arrêt du cycle, et grille des 37 sections rafraîchie en direct. Le firmware reproduit toute la logique du programme d'origine (scan, gating, PWM, overdrive). Prochaine étape : valider sur le vrai module chez Roger.
-
-### Build et exécution
-
-```
-arduino-cli compile --fqbn arduino:avr:mega arduino/mine_derien
-arduino-cli upload --fqbn arduino:avr:mega -p /dev/ttyACM0 arduino/mine_derien
-python -m venv python/.venv && python/.venv/bin/pip install -r python/requirements.txt
-python/.venv/bin/python python/handshake.py
-```
-
-Le câblage Mega ↔ module est décrit dans `pin_mapping.csv`.
-
-### Tests manuels
-
-Outils exécutables à tout moment pour vérifier le matériel. Ils détectent le port
-du Mega automatiquement ; on peut aussi le forcer en argument (ex. `/dev/ttyACM0`).
-
-```
-python/.venv/bin/python python/handshake.py [port]
-```
-Envoie `PING`, attend `PONG`. Confirme que la liaison série fonctionne.
-
-```
-python/.venv/bin/python python/gpio_test.py [port]
-```
-Console série interactive : envoie n'importe quelle commande au Mega
-(`PING`, `SET`/`GET`, `TC_*`, `SCAN`, `AUTO_START`, `GET_STATE`,
-`FORCE_PRESENT`...). L'outil unique pour valider le breadboard.
-
-```
-python/.venv/bin/python python/control_panel.py [port]
-```
-Ouvre le panneau de commande graphique : onglet « Test » (contrôle manuel
-section par section) et onglet « Auto » (cycle automatique, état en direct).
-Fonctionne identique sur breadboard et sur le vrai module.
-
-Pour retrouver le port du Mega : `arduino-cli board list`.
+**État courant : phase A terminée.** Le firmware reproduit toute la logique du
+programme d'origine et a été développé par étapes testables sur breadboard.
+Reste à valider sur le vrai module (voir *Plan de test*).
 
 ---
 
-## Architecture matérielle
+## Le réseau et son module
 
-### Voie ferrée — deux rails
+La voie utilise deux rails :
 
 | Rail | Rôle |
 |------|------|
-| Rail A | 12V constant (alimentation) |
-| Rail B | Connecté au module électronique (contrôle PWM) |
+| A | 12 V constant (alimentation des moteurs) |
+| B | relié au module électronique (contrôle PWM) |
 
-Quand un train est présent dans une section, son moteur crée un chemin de retour du courant vers le rail B. Cette chute de courant est détectée électroniquement et lue par le port parallèle comme un état binaire (train présent / absent).
+La voie est divisée en **37 sections** (indices 0–36) électriquement isolées,
+alimentées individuellement. Quand un train occupe une section, son moteur crée
+un chemin de retour du courant vers le rail B ; le module détecte cette présence
+et la rapporte sous forme d'un bit par section.
 
-### 37 sections de voie (indices 0–36)
-
-Chaque section est un segment de voie électriquement isolé, alimenté ou non individuellement. L'état de chaque section est stocké dans le tableau `BO(N)` :
-
-- `BO(N) = 1` → train présent dans la section N
-- `BO(N) = 0` → section vide
-
-### Interface port parallèle (LPT1 — adresses 0x378 à 0x37A)
-
-| Registre | Adresse décimale | Direction | Rôle |
-|----------|-----------------|-----------|------|
-| Data     | 888 (0x378)     | OUT       | Sélectionne la section (0–36) ou l'énergise (128+N) |
-| Status   | 889 (0x379)     | IN        | Lit la présence d'un train (bit 3) |
-| Control  | 890 (0x37A)     | OUT       | Séquence de contrôle (0, 1, 2) |
-
-#### Encodage du registre Data
-
-Le bit 7 du byte envoyé sur le registre Data distingue deux modes :
-
-- **Valeur 0–127** → sélection d'une section pour lecture (7 bits suffisent pour couvrir 0–36)
-- **Valeur 128–164** → alimentation de la section N, où `N = valeur - 128`
-
-`128 = 0b10000000` : le bit 7 allumé signifie "commande d'alimentation" au module électronique.
-
-#### Séquence de détection d'un train dans la section N
-
-```basic
-OUT 888, N      ' sélectionner la section
-OUT 890, 1      ' pulse : déclencher la lecture
-ETAT = INP(889) ' lire le registre Status
-BO(N) = ETAT / 8 AND 1  ' extraire le bit 3
-OUT 890, 0      ' reset
-OUT 890, 2      ' reset
-```
-
-`ETAT / 8` décale le byte de 3 bits vers la droite. `AND 1` isole le bit 3, qui indique la présence du train.
-
-#### Séquence d'alimentation de la section N
-
-```basic
-OUT 888, 128 + N   ' bit 7 = 1 → commande alimentation
-OUT 890, 1
-OUT 890, 0
-```
+Le **module électronique** de Roger est conservé tel quel. On ne remplace que
+l'ordinateur qui le pilotait.
 
 ---
 
-## Contrôle PWM (software)
+## L'interface de commande
 
-La vitesse des trains est contrôlée par modulation de largeur d'impulsion (PWM) implémentée entièrement en logiciel via des boucles de délai à vide.
+Le module attend les mêmes signaux que lui fournissait le port parallèle. Le Mega
+les reproduit sur ses broches. Câblage complet dans `pin_mapping.csv`.
 
-### Paramètres (saisis au démarrage)
+| Broche Mega | Signal | Rôle |
+|-------------|--------|------|
+| D22–D29 | bus d'adresse (8 bits) | sélectionne une section ; le bit 7 (D29) distingue *lecture* (0) et *alimentation* (1) |
+| D30 | verrou | valide l'adresse et déclenche l'action du module — **actif à l'état bas** |
+| D31 | fin de transaction | clôt une transaction — **actif à l'état bas** |
+| D32 | capteur | entrée : présence d'un train dans la section sélectionnée |
 
-| Variable | Rôle | Valeur typique |
-|----------|------|----------------|
-| `F` | Fréquence PWM en Hz | 15 |
-| `D` | Rapport cyclique en % (duty cycle) | 25 |
-| `Y` | Durée overdrive (paramètre supplémentaire) | 200 |
-
-### Calcul des délais
-
-```basic
-TD1 = D / (173.15 * F * 0.000001)        ' itérations boucle ON
-TD2 = (100 - D) / (173.15 * F * 0.000001) ' itérations boucle OFF
-```
-
-**Pourquoi 173.15 ?**
-C'est une constante empirique représentant la vitesse de la boucle `FOR-NEXT` vide sur le PC utilisé lors du développement. Chaque itération dure environ **1.73 µs** (soit ~577 000 itérations/seconde), mesurée sur ce matériel spécifique. Cette constante n'est pas portable : sur un PC plus rapide ou plus lent, le timing serait incorrect. La fréquence réelle `Hz` affichée à l'écran permettait de vérifier et d'ajuster.
-
-### Cycle PWM
-
-```
-┌─────────────────────────────────────────────────┐
-│ 1. SCAN      Lire l'état des 37 sections        │
-│ 2. GATING    Décider quelles sections alimenter │
-│ 3. ON        Alimenter les sections actives     │
-│ 4. DÉLAI ON  Boucle vide TD1 itérations         │
-│ 5. OFF       Couper toutes les sections         │
-│ 6. DÉLAI OFF Boucle vide TD2 itérations         │
-│ 7. OVERDRIVE Impulsions courtes par groupe      │
-│ 8. AFFICHAGE Mettre à jour l'écran (1/5 cycles) │
-└─────────────────────────────────────────────────┘
-```
+Une transaction = poser une adresse sur le bus, pulser le verrou, puis lire le
+capteur (scan) ou laisser le module alimenter la section (énergisation).
 
 ---
 
-## Logique de contrôle (gating)
+## Le firmware Arduino
 
-Avant d'alimenter chaque section, le programme applique des règles conditionnelles.
+Dans `arduino/mine_derien/`, en couches :
 
-### Réduction de vitesse (`I MOD 9 = 1`)
+| Fichier | Rôle |
+|---------|------|
+| `track_controller.*` | interface bas niveau au module ; encapsule les broches et les polarités |
+| `sections.*` | opérations par section : scan, énergiser, désénergiser, overdrive |
+| `gating.*` | règles décidant quelles sections alimenter |
+| `cycle.*` | boucle PWM automatique non bloquante |
+| `timing.*` | conversion fréquence/duty → délais ON/OFF |
+| `serial_commands.*` | protocole ASCII sur USB |
+| `pins.h` | constantes de câblage |
 
-Les sections 0, 1, 2, 7 et 14 sont sautées (non alimentées) quand le compteur de cycle `I` est tel que `I MOD 9 = 1`, soit environ 1 cycle sur 9. Cela réduit leur rapport cyclique effectif de ~11%, ralentissant les trains dans ces zones sans modifier les paramètres globaux F et D.
+### La logique de contrôle
 
-Le chiffre 9 a été déterminé empiriquement pour obtenir la réduction de vitesse souhaitée sur ces sections spécifiques de la voie.
+Le cycle automatique répète, sans bloquer la liaison série (machine à états sur
+`micros()`) :
 
-### Arrêts complets (anti-collision)
+1. **Scan** des 37 sections → mise à jour de l'état de présence
+2. **Gating** : décider quelles sections alimenter
+3. **Énergisation** des sections permises, puis délai ON
+4. **Coupure** de toutes les sections, puis délai OFF
+5. **Overdrive** : brèves impulsions par groupe
 
-| Condition | Sections bloquées | Raison |
-|-----------|------------------|--------|
-| `BO(8) = 1` | 0, 1, 2, 7 | Train détecté en section 8 → arrêter les trains en amont |
-| `BO(0..3) = 1` | 8, 15 | Trains en sections 0–3 → bloquer section 8 et 15 |
-| `BO(2) = 1` ou `BO(3) = 1` | 14 | Protection supplémentaire section 14 |
+**Gating** — deux familles de règles :
+- *Zones lentes* : les sections 0, 1, 2, 7, 14 sont sautées un cycle sur neuf,
+  ce qui ralentit les trains qui y passent.
+- *Anti-collision* : sections 0, 1, 2, 7 coupées si un train occupe la 8 ;
+  jonctions 8 et 15 coupées si un train approche (sections 0–3) ; section 14
+  coupée si un train occupe la 2 ou la 3.
 
-> **Note :** Les lignes 54–57 contiennent une ambiguïté de précédence des opérateurs QBasic (`OR` vs `AND`) qui mériterait vérification lors de la réécriture.
+Le programme QBasic d'origine avait ici une ambiguïté de précédence d'opérateurs ;
+le firmware exprime l'intention voulue plutôt que de la reproduire.
 
----
-
-## Overdrive
-
-À la fin de chaque cycle PWM, le programme applique des impulsions courtes sur toutes les sections, par groupe :
-
-```
-Groupe 1 : sections 0–7   → impulsion → délai 200 iter
-Groupe 2 : sections 8–15  → impulsion → délai 200 iter
-Groupe 3 : sections 16–36 → impulsion → délai 200 iter
-```
-
-**Raison physique :** Les virages de la voie créent une résistance mécanique accrue (friction). Sans overdrive, les trains peuvent caler dans les courbes. Les impulsions courtes fournissent un coup de courant supplémentaire pour maintenir le mouvement, indépendamment du cycle PWM principal.
-
-L'overdrive est uniforme sur tous les groupes — il n'est pas conditionnel à la détection d'un virage. Les sections en ligne droite le reçoivent aussi, sans effet négatif notable.
-
----
-
-## Affichage terminal
-
-Toutes les 5 itérations (`I MOD 5 = 1`), l'écran est mis à jour :
-
-```
-                    MINE DERIEN ET PORT RIENAFER
-                              MD0809023
-                    --------------------------
-
-BLOC  BO(N%)        BLOC  BO(N%)        BLOC  BO(N%)
-0     0             16    1             32    0
-1     1             17    0             33    0
-...                 ...                 ...
-15    0             31    0             36    1
-
-FREQUENCY - REF: 15   ACTUAL: 14.8   D%= 25
-TD1= 9625   TD2= 28876   TD3= 7000   TD4= 500   OVERDRIVE= 200
-TIMER - START: 12.3   PRESENT: 45.7   ELAPSED TIME: 33.4     14:23:07
-```
-
-Les 37 sections sont affichées en 3 colonnes (0–15, 16–31, 32–36). La fréquence réelle est calculée comme `Hz = I / temps_écoulé` et permet de vérifier la calibration.
+**Overdrive** — après chaque cycle, de brèves impulsions sont envoyées sur les
+trois groupes de sections [0–7], [8–15], [16–36]. Elles donnent un coup de
+courant supplémentaire pour empêcher les trains de caler dans les courbes, où la
+friction est plus forte.
 
 ---
 
-## Variables principales
+## Le protocole série
 
-| Variable | Type | Rôle |
-|----------|------|------|
-| `F` | Long | Fréquence PWM cible (Hz) |
-| `D` | Long | Rapport cyclique (%) |
-| `Y` | Long | Paramètre overdrive |
-| `TD1` | Long | Itérations délai ON |
-| `TD2` | Long | Itérations délai OFF |
-| `TD3` | Long | 7000 (non utilisé activement dans la boucle visible) |
-| `TD4` | Long | 500 (non utilisé activement dans la boucle visible) |
-| `TD5` | Long | 5000 (non utilisé activement dans la boucle visible) |
-| `BO(50)` | Long[] | État de présence train par section (0 ou 1) |
-| `I` | Long | Compteur de cycles |
-| `N%` | Integer | Index de section courant |
-| `A`, `B`, `C` | Long | Timer : départ, présent, écoulé |
-| `Hz` | Long | Fréquence réelle calculée |
+Commandes ASCII terminées par un retour de ligne, à 115200 bauds. Chaque commande
+renvoie une ligne de réponse.
 
-> `DEFLNG A-Z` en ligne 2 déclare toutes les variables comme entiers longs (32 bits). Sans cette directive, QBasic utilise des entiers 16 bits, insuffisants pour les grandes valeurs de TD1/TD2.
+| Commande | Réponse | Rôle |
+|----------|---------|------|
+| `PING` | `PONG` | test de liaison |
+| `SET <pin> <0\|1>` | `OK` | pilote une sortie brute |
+| `GET <pin>` | `0`/`1` | lit une entrée brute |
+| `TC_ADDR <section> <0\|1>` | `OK` | pose une adresse (2e arg = bit alimentation) |
+| `TC_LATCH` / `TC_END` / `TC_RELEASE_ALL` | `OK` | pilote les lignes de contrôle |
+| `TC_SENSE` | `0`/`1` | lit le capteur de présence |
+| `SCAN <n>` | `0`/`1` | scanne une section |
+| `ENERGIZE <n>` | `OK` | alimente une section |
+| `DEENERGIZE_ALL` | `OK` | coupe toutes les sections |
+| `OVERDRIVE <n>` | `OK` | impulsion d'overdrive sur une section |
+| `GET_STATE` | 10 hex | état de présence des 37 sections |
+| `FORCE_PRESENT <n> <0\|1>` | `OK` | force l'état d'une section (test du gating) |
+| `RESET_FORCED` | `OK` | annule tous les forçages |
+| `AUTO_START <Hz> <%>` | `OK` | démarre le cycle automatique |
+| `AUTO_STOP` | `OK` | arrête le cycle |
 
 ---
 
-## Améliorations planifiées
+## Les outils Python
 
-Voir les issues GitHub du projet :
+Dans `python/`. Tous détectent le port du Mega automatiquement, ou l'acceptent
+en argument.
 
-- **#1** — Remplacer les boucles busy-wait par du threading Python
-- **#2** — Overdrive : documenter et modéliser le comportement en virage
-- **#3** — Remplacer la constante empirique 173.15 par un timing calibré dynamiquement
+- **`control_panel.py`** — UI graphique. Onglet *Test* : contrôle manuel section
+  par section. Onglet *Auto* : démarre le cycle et affiche l'état des 37 sections
+  en direct. Même UI sur breadboard et sur le vrai module.
+- **`gpio_test.py`** — console série : envoie n'importe quelle commande au Mega.
+  L'outil principal pour dérouler le plan de test.
+- **`handshake.py`** — vérifie la liaison (`PING`/`PONG`).
+- **`serial_link.py`** — client série partagé par les outils ci-dessus.
+
+---
+
+## Build et exécution
+
+```
+arduino-cli compile --fqbn arduino:avr:mega arduino/mine_derien
+arduino-cli upload  --fqbn arduino:avr:mega -p /dev/ttyACM0 arduino/mine_derien
+
+python -m venv python/.venv
+python/.venv/bin/pip install -r python/requirements.txt
+python/.venv/bin/python python/control_panel.py
+```
+
+Le port du Mega se retrouve avec `arduino-cli board list`. Un seul programme à la
+fois peut ouvrir le port : fermer un outil avant d'en lancer un autre. Sous Linux,
+l'utilisateur doit appartenir au groupe `dialout` pour accéder au port.
+
+---
+
+## Plan de test
+
+### 1. Montage breadboard
+
+On valide le firmware sans le module de Roger en simulant ses signaux :
+
+| Broche | Composant | Simule |
+|--------|-----------|--------|
+| D22–D29 | 8 LEDs + résistance 220 Ω vers GND | le bus d'adresse |
+| D30, D31 | 1 LED + 220 Ω chacune | les lignes de contrôle |
+| D32 | switch entre +5 V et la broche, pull-down 10 kΩ vers GND | le capteur de présence |
+
+> D30 et D31 sont **actives à l'état bas** : LED allumée = ligne au repos, LED
+> éteinte = ligne active. C'est l'inverse de l'intuition. Pour un visuel direct,
+> câbler ces deux LEDs vers +5 V au lieu de GND.
+
+### 2. Tests sur breadboard
+
+Téléverser le sketch, puis dérouler via `gpio_test.py` :
+
+| Commande | Attendu |
+|----------|---------|
+| `PING` | `PONG` ; la LED interne du Mega clignote |
+| `SET 22 1` … `SET 29 1` | chaque LED du bus s'allume |
+| `GET 32` | suit le switch (0 ouvert / 1 fermé) |
+| `TC_ADDR 5 1` | LEDs D22, D24 et D29 (bit alimentation) allumées |
+| `TC_LATCH` | D30 **s'éteint** (verrou actif) |
+| `TC_RELEASE_ALL` | D30 et D31 allumées (repos) |
+| `TC_SENSE` | suit le switch |
+| `SCAN 12` | suit le switch |
+| `ENERGIZE 5` | LEDs montrant `0x85` |
+| `DEENERGIZE_ALL` | bus à zéro |
+| `AUTO_START 2 50` | D29 clignote lentement, visible à l'œil |
+| `GET_STATE` | 10 caractères hexadécimaux |
+| `AUTO_STOP` | le cycle s'arrête |
+
+Puis ouvrir `control_panel.py` : onglet *Test* (scan/énergiser par section),
+onglet *Auto* (démarrer le cycle, grille rafraîchie en direct).
+
+Le gating se vérifie avec `FORCE_PRESENT` : forcer une présence puis lire
+`GET_STATE`. Son effet visible (sections sautées) ne se constate qu'avec de
+vrais trains — le balayage d'énergisation est trop rapide pour les LEDs.
+
+### 3. Transition vers le module de Roger
+
+1. **Câblage** — remplacer le breadboard par le câble vers le module, selon les
+   colonnes `Legacy_signal` / `DB25_pin` de `pin_mapping.csv`. Ajouter une
+   résistance série de 1 kΩ sur la ligne du capteur (D32) comme protection.
+2. **Polarités** — vérifier l'hypothèse « actif à l'état bas » de D30/D31. Si le
+   module ne réagit pas, inverser `MODULE_ACTIVE_LEVEL` dans `track_controller.cpp`.
+3. **Smoke test** — poser un train sur une section connue, `SCAN <n>` doit
+   renvoyer `1`.
+4. **Énergisation** — `ENERGIZE <n>` doit faire bouger le train (ou alimenter le
+   moteur, mesurable au multimètre).
+5. **Timing** — si le module ne verrouille pas l'adresse, le pulse de verrou est
+   peut-être trop court ; ajouter un `delayMicroseconds()` dans `track_controller`.
+6. **Cycle complet** — `AUTO_START 15 25` (paramètres historiques), les trains
+   roulent.
+
+---
+
+## Programme d'origine
+
+Le programme QBasic d'origine est conservé, commenté, dans
+`initial_basic_program.bas` — référence pour la logique du réseau.
