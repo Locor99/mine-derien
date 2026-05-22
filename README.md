@@ -12,7 +12,7 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A5 terminée** — opérations sémantiques par section disponibles : `SCAN`, `ENERGIZE`, `DEENERGIZE_ALL`, `OVERDRIVE`. Chaque commande compose les primitives `track_controller` selon les séquences éprouvées du programme d'origine.
+**État courant : étape A6 terminée** — l'UI Tkinter `control_panel.py` offre un onglet « Test » : grille des 37 sections avec boutons Scan / Énergiser par section, désénergisation globale et accès aux pins brutes.
 
 ### Build et exécution
 
@@ -40,6 +40,12 @@ python/.venv/bin/python python/gpio_test.py [port]
 ```
 Session interactive : `set <pin> <0|1>` pour piloter une sortie, `get <pin>`
 pour lire une entrée. Sert à valider chaque LED et chaque switch du breadboard.
+
+```
+python/.venv/bin/python python/control_panel.py [port]
+```
+Ouvre le panneau de commande graphique (onglet « Test » : contrôle manuel
+section par section). Fonctionne identique sur breadboard et sur le vrai module.
 
 Pour retrouver le port du Mega : `arduino-cli board list`.
 
