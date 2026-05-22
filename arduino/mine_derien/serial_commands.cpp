@@ -70,8 +70,26 @@ bool dispatchTrackControllerCommand(char* tokens[], uint8_t count) {
   return true;
 }
 
+void printSectionState() {
+  char hex[11];
+  for (uint8_t nibble = 0; nibble < 10; nibble++) {
+    uint8_t value = 0;
+    for (uint8_t bit = 0; bit < 4; bit++) {
+      uint8_t section = nibble * 4 + bit;
+      if (section < SECTION_COUNT && trainPresent[section]) {
+        value |= (1 << bit);
+      }
+    }
+    hex[nibble] = value < 10 ? '0' + value : 'A' + value - 10;
+  }
+  hex[10] = '\0';
+  Serial.println(hex);
+}
+
 bool dispatchSectionCommand(char* tokens[], uint8_t count) {
-  if (strcmp(tokens[0], "SCAN") == 0 && count == 2) {
+  if (strcmp(tokens[0], "GET_STATE") == 0) {
+    printSectionState();
+  } else if (strcmp(tokens[0], "SCAN") == 0 && count == 2) {
     Serial.println(scanSection(atoi(tokens[1])) ? 1 : 0);
   } else if (strcmp(tokens[0], "ENERGIZE") == 0 && count == 2) {
     energizeSection(atoi(tokens[1]));

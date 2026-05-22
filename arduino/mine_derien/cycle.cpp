@@ -33,6 +33,7 @@ void start(uint16_t frequencyHz, uint8_t dutyCyclePercent) {
   PwmTiming timing = computePwmTiming(frequencyHz, dutyCyclePercent);
   poweredDurationMicros = timing.onMicros;
   restingDurationMicros = timing.offMicros;
+  scanAllSections();
   energizeEverySection();
   enterPhase(POWERED);
 }
@@ -47,6 +48,7 @@ void update() {
     deenergizeAllSections();
     enterPhase(RESTING);
   } else if (phase == RESTING && phaseElapsed(restingDurationMicros)) {
+    scanAllSections();
     energizeEverySection();
     enterPhase(POWERED);
   }

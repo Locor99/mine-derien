@@ -2,6 +2,8 @@
 #include "pins.h"
 #include "track_controller.h"
 
+bool trainPresent[SECTION_COUNT];
+
 bool scanSection(uint8_t section) {
   TrackController::setAddress(section, false);
   TrackController::latch();
@@ -9,6 +11,12 @@ bool scanSection(uint8_t section) {
   TrackController::releaseAll();
   TrackController::endTransaction();
   return present;
+}
+
+void scanAllSections() {
+  for (uint8_t section = 0; section < SECTION_COUNT; section++) {
+    trainPresent[section] = scanSection(section);
+  }
 }
 
 void energizeSection(uint8_t section) {
