@@ -2,3 +2,4 @@
 python/.venv/
 __pycache__/
 arduino/build/
+*.ino.blockly
