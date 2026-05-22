@@ -35,18 +35,22 @@ l'ordinateur qui le pilotait.
 
 ## L'interface de commande
 
-Le module attend les mêmes signaux que lui fournissait le port parallèle. Le Mega
-les reproduit sur ses broches. Câblage complet dans `pin_mapping.csv`.
+Le module attend les mêmes signaux que lui fournissait le port parallèle ; le Mega
+les reproduit sur ses broches. Le câblage complet — broche Mega, signal, broche
+DB25 d'origine, polarité — est dans **`pin_mapping.csv`**.
 
-| Broche Mega | Signal | Rôle |
-|-------------|--------|------|
-| D22–D29 | bus d'adresse (8 bits) | sélectionne une section ; le bit 7 (D29) distingue *lecture* (0) et *alimentation* (1) |
-| D30 | verrou | valide l'adresse et déclenche l'action du module — **actif à l'état bas** |
-| D31 | fin de transaction | clôt une transaction — **actif à l'état bas** |
-| D32 | capteur | entrée : présence d'un train dans la section sélectionnée |
+Quatre signaux :
 
-Une transaction = poser une adresse sur le bus, pulser le verrou, puis lire le
-capteur (scan) ou laisser le module alimenter la section (énergisation).
+- un **bus d'adresse** de 8 bits qui sélectionne une section ; son bit de poids
+  fort distingue une *lecture* d'une *alimentation* ;
+- une ligne de **verrou** qui valide l'adresse et déclenche l'action du module ;
+- une ligne de **fin de transaction** ;
+- une entrée **capteur** qui rapporte la présence d'un train dans la section
+  sélectionnée.
+
+Le verrou et la fin de transaction sont actifs à l'état bas. Une transaction
+consiste à poser une adresse, pulser le verrou, puis lire le capteur (scan) ou
+laisser le module alimenter la section (énergisation).
 
 ---
 
