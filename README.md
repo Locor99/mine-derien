@@ -12,7 +12,7 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A3 terminée** — on peut piloter et lire n'importe quelle pin du Mega depuis Python (`SET`/`GET`), de quoi vérifier le câblage du breadboard.
+**État courant : étape A4 terminée** — la couche `track_controller` (interface bas niveau au module électronique) est en place. Commandes série `TC_*` pour piloter le bus d'adresse, le verrou et lire le capteur de présence.
 
 ### Build et exécution
 
