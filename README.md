@@ -12,13 +12,15 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A1 terminée** — échafaudage du projet en place. Le sketch Arduino compile pour le Mega ; l'environnement Python est prêt.
+**État courant : étape A2 terminée** — la liaison série fonctionne. Le Mega répond `PONG` à un `PING` et clignote sa LED interne.
 
 ### Build et exécution
 
 ```
 arduino-cli compile --fqbn arduino:avr:mega arduino/mine_derien
+arduino-cli upload --fqbn arduino:avr:mega -p /dev/ttyACM0 arduino/mine_derien
 python -m venv python/.venv && python/.venv/bin/pip install -r python/requirements.txt
+python/.venv/bin/python python/handshake.py
 ```
 
 Le câblage Mega ↔ module est décrit dans `pin_mapping.csv`.
