@@ -4,6 +4,11 @@
 
 bool trainPresent[SECTION_COUNT];
 
+namespace {
+constexpr int8_t NOT_FORCED = -1;
+int8_t forcedPresence[SECTION_COUNT];
+}
+
 bool scanSection(uint8_t section) {
   TrackController::setAddress(section, false);
   TrackController::latch();
@@ -15,7 +20,23 @@ bool scanSection(uint8_t section) {
 
 void scanAllSections() {
   for (uint8_t section = 0; section < SECTION_COUNT; section++) {
-    trainPresent[section] = scanSection(section);
+    if (forcedPresence[section] != NOT_FORCED) {
+      trainPresent[section] = forcedPresence[section] != 0;
+    } else {
+      trainPresent[section] = scanSection(section);
+    }
+  }
+}
+
+void forcePresence(uint8_t section, bool present) {
+  if (section < SECTION_COUNT) {
+    forcedPresence[section] = present ? 1 : 0;
+  }
+}
+
+void clearForcedPresence() {
+  for (uint8_t section = 0; section < SECTION_COUNT; section++) {
+    forcedPresence[section] = NOT_FORCED;
   }
 }
 

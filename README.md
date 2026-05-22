@@ -12,7 +12,7 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A8 terminée** — le cycle scanne les 37 sections en tête de chaque tour et tient à jour `trainPresent[]`. Commande `GET_STATE` pour lire l'état complet du réseau (hex 10 caractères).
+**État courant : étape A9 terminée** — le cycle applique les règles de gating (zones lentes + anti-collision) avant d'alimenter chaque section. Commandes `FORCE_PRESENT` / `RESET_FORCED` pour simuler des trains sur breadboard.
 
 ### Build et exécution
 

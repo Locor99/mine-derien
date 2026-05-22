@@ -1,4 +1,5 @@
 #include "cycle.h"
+#include "gating.h"
 #include "pins.h"
 #include "sections.h"
 #include "timing.h"
@@ -10,10 +11,13 @@ Phase phase = STOPPED;
 uint32_t phaseStartMicros = 0;
 uint32_t poweredDurationMicros = 0;
 uint32_t restingDurationMicros = 0;
+uint32_t cycleCount = 0;
 
-void energizeEverySection() {
+void energizeAllowedSections() {
   for (uint8_t section = 0; section < SECTION_COUNT; section++) {
-    energizeSection(section);
+    if (!shouldSkipSection(section, cycleCount)) {
+      energizeSection(section);
+    }
   }
 }
 
@@ -33,8 +37,9 @@ void start(uint16_t frequencyHz, uint8_t dutyCyclePercent) {
   PwmTiming timing = computePwmTiming(frequencyHz, dutyCyclePercent);
   poweredDurationMicros = timing.onMicros;
   restingDurationMicros = timing.offMicros;
+  cycleCount = 0;
   scanAllSections();
-  energizeEverySection();
+  energizeAllowedSections();
   enterPhase(POWERED);
 }
 
@@ -48,8 +53,9 @@ void update() {
     deenergizeAllSections();
     enterPhase(RESTING);
   } else if (phase == RESTING && phaseElapsed(restingDurationMicros)) {
+    cycleCount++;
     scanAllSections();
-    energizeEverySection();
+    energizeAllowedSections();
     enterPhase(POWERED);
   }
 }

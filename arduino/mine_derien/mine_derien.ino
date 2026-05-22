@@ -1,4 +1,5 @@
 #include "cycle.h"
+#include "sections.h"
 #include "serial_commands.h"
 #include "track_controller.h"
 
@@ -8,6 +9,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(SERIAL_BAUD);
   TrackController::initialize();
+  clearForcedPresence();
 }
 
 void loop() {

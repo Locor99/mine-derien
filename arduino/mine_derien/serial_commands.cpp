@@ -100,6 +100,12 @@ bool dispatchSectionCommand(char* tokens[], uint8_t count) {
   } else if (strcmp(tokens[0], "OVERDRIVE") == 0 && count == 2) {
     pulseOverdrive(atoi(tokens[1]));
     Serial.println("OK");
+  } else if (strcmp(tokens[0], "FORCE_PRESENT") == 0 && count == 3) {
+    forcePresence(atoi(tokens[1]), atoi(tokens[2]) != 0);
+    Serial.println("OK");
+  } else if (strcmp(tokens[0], "RESET_FORCED") == 0) {
+    clearForcedPresence();
+    Serial.println("OK");
   } else {
     return false;
   }
