@@ -12,7 +12,7 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A10 terminée** — chaque cycle se termine par l'overdrive : trois rafales d'impulsions courtes sur les groupes de sections [0-7], [8-15], [16-36]. Parité fonctionnelle complète avec le programme d'origine.
+**État courant : étape A11 terminée — phase A complète.** L'UI a un onglet « Auto » : champs fréquence/duty, démarrage/arrêt du cycle, et grille des 37 sections rafraîchie en direct. Le firmware reproduit toute la logique du programme d'origine (scan, gating, PWM, overdrive). Prochaine étape : valider sur le vrai module chez Roger.
 
 ### Build et exécution
 
@@ -44,8 +44,9 @@ pour lire une entrée. Sert à valider chaque LED et chaque switch du breadboard
 ```
 python/.venv/bin/python python/control_panel.py [port]
 ```
-Ouvre le panneau de commande graphique (onglet « Test » : contrôle manuel
-section par section). Fonctionne identique sur breadboard et sur le vrai module.
+Ouvre le panneau de commande graphique : onglet « Test » (contrôle manuel
+section par section) et onglet « Auto » (cycle automatique, état en direct).
+Fonctionne identique sur breadboard et sur le vrai module.
 
 Pour retrouver le port du Mega : `arduino-cli board list`.
 
