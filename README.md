@@ -12,7 +12,7 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A2 terminée** — la liaison série fonctionne. Le Mega répond `PONG` à un `PING` et clignote sa LED interne.
+**État courant : étape A3 terminée** — on peut piloter et lire n'importe quelle pin du Mega depuis Python (`SET`/`GET`), de quoi vérifier le câblage du breadboard.
 
 ### Build et exécution
 
@@ -24,6 +24,24 @@ python/.venv/bin/python python/handshake.py
 ```
 
 Le câblage Mega ↔ module est décrit dans `pin_mapping.csv`.
+
+### Tests manuels
+
+Outils exécutables à tout moment pour vérifier le matériel. Ils détectent le port
+du Mega automatiquement ; on peut aussi le forcer en argument (ex. `/dev/ttyACM0`).
+
+```
+python/.venv/bin/python python/handshake.py [port]
+```
+Envoie `PING`, attend `PONG`. Confirme que la liaison série fonctionne.
+
+```
+python/.venv/bin/python python/gpio_test.py [port]
+```
+Session interactive : `set <pin> <0|1>` pour piloter une sortie, `get <pin>`
+pour lire une entrée. Sert à valider chaque LED et chaque switch du breadboard.
+
+Pour retrouver le port du Mega : `arduino-cli board list`.
 
 ---
 
