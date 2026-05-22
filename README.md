@@ -2,7 +2,26 @@
 
 Projet développé par un ingénieur électrique pour contrôler un réseau de trains miniatures via port parallèle depuis un PC sous QBasic. Le code original (`initial_basic_program.bas`) date de 2008–2009 (référence interne `MD0809023`).
 
-L'objectif actuel est de moderniser la plateforme logicielle et matérielle côté ordinateur, tout en conservant l'interface parallèle existante côté trains.
+L'objectif actuel est de moderniser la plateforme logicielle et matérielle côté ordinateur, tout en conservant l'interface électrique existante côté trains.
+
+---
+
+## Modernisation en cours
+
+Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/mine_derien/`) qui pilote directement le module électronique des trains. Une **UI Python** (`python/`) communique avec le Mega par liaison série USB pour le configurer et l'observer.
+
+Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
+
+**État courant : étape A1 terminée** — échafaudage du projet en place. Le sketch Arduino compile pour le Mega ; l'environnement Python est prêt.
+
+### Build et exécution
+
+```
+arduino-cli compile --fqbn arduino:avr:mega arduino/mine_derien
+python -m venv python/.venv && python/.venv/bin/pip install -r python/requirements.txt
+```
+
+Le câblage Mega ↔ module est décrit dans `pin_mapping.csv`.
 
 ---
 
