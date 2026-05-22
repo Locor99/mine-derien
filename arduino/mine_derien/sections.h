@@ -10,5 +10,6 @@ void scanAllSections();
 void energizeSection(uint8_t section);
 void deenergizeAllSections();
 void pulseOverdrive(uint8_t section);
+void runOverdriveCycle();
 void forcePresence(uint8_t section, bool present);
 void clearForcedPresence();

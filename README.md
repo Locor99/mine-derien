@@ -12,7 +12,7 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A9 terminée** — le cycle applique les règles de gating (zones lentes + anti-collision) avant d'alimenter chaque section. Commandes `FORCE_PRESENT` / `RESET_FORCED` pour simuler des trains sur breadboard.
+**État courant : étape A10 terminée** — chaque cycle se termine par l'overdrive : trois rafales d'impulsions courtes sur les groupes de sections [0-7], [8-15], [16-36]. Parité fonctionnelle complète avec le programme d'origine.
 
 ### Build et exécution
 

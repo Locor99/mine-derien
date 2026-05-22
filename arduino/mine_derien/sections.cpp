@@ -7,6 +7,17 @@ bool trainPresent[SECTION_COUNT];
 namespace {
 constexpr int8_t NOT_FORCED = -1;
 int8_t forcedPresence[SECTION_COUNT];
+
+constexpr uint16_t OVERDRIVE_PAUSE_MICROS = 350;
+constexpr uint8_t OVERDRIVE_GROUP_1_END = 8;
+constexpr uint8_t OVERDRIVE_GROUP_2_END = 16;
+
+void pulseOverdriveGroup(uint8_t firstSection, uint8_t endSection) {
+  for (uint8_t section = firstSection; section < endSection; section++) {
+    pulseOverdrive(section);
+  }
+  delayMicroseconds(OVERDRIVE_PAUSE_MICROS);
+}
 }
 
 bool scanSection(uint8_t section) {
@@ -58,4 +69,13 @@ void pulseOverdrive(uint8_t section) {
   TrackController::setAddress(section, true);
   TrackController::releaseAll();
   TrackController::latch();
+}
+
+void runOverdriveCycle() {
+  pulseOverdriveGroup(0, OVERDRIVE_GROUP_1_END);
+  pulseOverdriveGroup(OVERDRIVE_GROUP_1_END, OVERDRIVE_GROUP_2_END);
+  pulseOverdriveGroup(OVERDRIVE_GROUP_2_END, SECTION_COUNT);
+  TrackController::setAddress(0, false);
+  TrackController::latch();
+  TrackController::endTransaction();
 }

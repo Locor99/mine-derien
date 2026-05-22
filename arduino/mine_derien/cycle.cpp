@@ -53,6 +53,7 @@ void update() {
     deenergizeAllSections();
     enterPhase(RESTING);
   } else if (phase == RESTING && phaseElapsed(restingDurationMicros)) {
+    runOverdriveCycle();
     cycleCount++;
     scanAllSections();
     energizeAllowedSections();
