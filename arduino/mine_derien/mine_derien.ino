@@ -1,3 +1,4 @@
+#include "cycle.h"
 #include "serial_commands.h"
 #include "track_controller.h"
 
@@ -11,4 +12,5 @@ void setup() {
 
 void loop() {
   processSerialInput();
+  Cycle::update();
 }

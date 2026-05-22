@@ -12,7 +12,7 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A6 terminée** — l'UI Tkinter `control_panel.py` offre un onglet « Test » : grille des 37 sections avec boutons Scan / Énergiser par section, désénergisation globale et accès aux pins brutes.
+**État courant : étape A7 terminée** — le Mega exécute un cycle PWM autonome non bloquant (`AUTO_START <Hz> <%>` / `AUTO_STOP`). Boucle ouverte : toutes les sections sont alimentées, sans scan ni gating.
 
 ### Build et exécution
 

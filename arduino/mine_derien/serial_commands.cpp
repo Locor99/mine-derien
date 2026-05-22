@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "serial_commands.h"
+#include "cycle.h"
 #include "sections.h"
 #include "track_controller.h"
 
@@ -87,6 +88,25 @@ bool dispatchSectionCommand(char* tokens[], uint8_t count) {
   return true;
 }
 
+bool dispatchCycleCommand(char* tokens[], uint8_t count) {
+  if (strcmp(tokens[0], "AUTO_START") == 0 && count == 3) {
+    uint16_t frequencyHz = atoi(tokens[1]);
+    int dutyCyclePercent = atoi(tokens[2]);
+    if (frequencyHz == 0 || dutyCyclePercent < 0 || dutyCyclePercent > 100) {
+      Serial.println("ERR");
+    } else {
+      Cycle::start(frequencyHz, dutyCyclePercent);
+      Serial.println("OK");
+    }
+  } else if (strcmp(tokens[0], "AUTO_STOP") == 0) {
+    Cycle::stop();
+    Serial.println("OK");
+  } else {
+    return false;
+  }
+  return true;
+}
+
 void dispatchCommand(char* line) {
   char* tokens[MAX_TOKENS];
   uint8_t count = tokenize(line, tokens);
@@ -100,6 +120,9 @@ void dispatchCommand(char* line) {
     return;
   }
   if (dispatchSectionCommand(tokens, count)) {
+    return;
+  }
+  if (dispatchCycleCommand(tokens, count)) {
     return;
   }
   Serial.println("ERR");
