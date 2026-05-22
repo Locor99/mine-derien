@@ -12,7 +12,7 @@ Le PC QBasic est remplacé par un **Arduino Mega 2560** (firmware dans `arduino/
 
 Le développement avance par étapes testables, d'abord sur breadboard à la maison, puis sur le vrai matériel.
 
-**État courant : étape A4 terminée** — la couche `track_controller` (interface bas niveau au module électronique) est en place. Commandes série `TC_*` pour piloter le bus d'adresse, le verrou et lire le capteur de présence.
+**État courant : étape A5 terminée** — opérations sémantiques par section disponibles : `SCAN`, `ENERGIZE`, `DEENERGIZE_ALL`, `OVERDRIVE`. Chaque commande compose les primitives `track_controller` selon les séquences éprouvées du programme d'origine.
 
 ### Build et exécution
 

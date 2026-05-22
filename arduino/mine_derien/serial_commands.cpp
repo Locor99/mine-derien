@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "serial_commands.h"
+#include "sections.h"
 #include "track_controller.h"
 
 namespace {
@@ -68,6 +69,24 @@ bool dispatchTrackControllerCommand(char* tokens[], uint8_t count) {
   return true;
 }
 
+bool dispatchSectionCommand(char* tokens[], uint8_t count) {
+  if (strcmp(tokens[0], "SCAN") == 0 && count == 2) {
+    Serial.println(scanSection(atoi(tokens[1])) ? 1 : 0);
+  } else if (strcmp(tokens[0], "ENERGIZE") == 0 && count == 2) {
+    energizeSection(atoi(tokens[1]));
+    Serial.println("OK");
+  } else if (strcmp(tokens[0], "DEENERGIZE_ALL") == 0) {
+    deenergizeAllSections();
+    Serial.println("OK");
+  } else if (strcmp(tokens[0], "OVERDRIVE") == 0 && count == 2) {
+    pulseOverdrive(atoi(tokens[1]));
+    Serial.println("OK");
+  } else {
+    return false;
+  }
+  return true;
+}
+
 void dispatchCommand(char* line) {
   char* tokens[MAX_TOKENS];
   uint8_t count = tokenize(line, tokens);
@@ -78,6 +97,9 @@ void dispatchCommand(char* line) {
     return;
   }
   if (dispatchTrackControllerCommand(tokens, count)) {
+    return;
+  }
+  if (dispatchSectionCommand(tokens, count)) {
     return;
   }
   Serial.println("ERR");
