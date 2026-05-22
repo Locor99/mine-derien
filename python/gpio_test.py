@@ -2,11 +2,17 @@ import sys
 
 from serial_link import SerialLink, find_arduino_port
 
-USAGE = """Commandes :
-  set <pin> <0|1>   allume ou éteint une sortie
-  get <pin>         lit l'état d'une entrée
-  ping              teste la liaison
-  quit              quitte
+USAGE = """Console série — tape une commande, Entrée pour l'envoyer.
+Exemples :
+  PING                  test de liaison
+  SET 22 1 / GET 32     piloter / lire une pin
+  TC_ADDR 5 1           bus d'adresse du module
+  SCAN 12 / ENERGIZE 5  opérations par section
+  AUTO_START 15 25      démarrer le cycle PWM
+  GET_STATE             état des 37 sections
+  FORCE_PRESENT 8 1     simuler un train (test gating)
+  quit                  quitter
+La casse n'a pas d'importance.
 """
 
 
@@ -14,20 +20,6 @@ def resolve_port(arguments):
     if len(arguments) > 1:
         return arguments[1]
     return find_arduino_port()
-
-
-def translate(user_input):
-    parts = user_input.split()
-    if not parts:
-        return None
-    verb = parts[0].lower()
-    if verb == "set" and len(parts) == 3:
-        return f"SET {parts[1]} {parts[2]}"
-    if verb == "get" and len(parts) == 2:
-        return f"GET {parts[1]}"
-    if verb == "ping":
-        return "PING"
-    return None
 
 
 def run_session(link):
@@ -39,11 +31,9 @@ def run_session(link):
             return
         if user_input.lower() in ("quit", "exit", "q"):
             return
-        command = translate(user_input)
-        if command is None:
-            print(USAGE)
+        if not user_input:
             continue
-        print(link.request(command))
+        print(link.request(user_input.upper()))
 
 
 def main():

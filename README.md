@@ -38,8 +38,9 @@ Envoie `PING`, attend `PONG`. Confirme que la liaison série fonctionne.
 ```
 python/.venv/bin/python python/gpio_test.py [port]
 ```
-Session interactive : `set <pin> <0|1>` pour piloter une sortie, `get <pin>`
-pour lire une entrée. Sert à valider chaque LED et chaque switch du breadboard.
+Console série interactive : envoie n'importe quelle commande au Mega
+(`PING`, `SET`/`GET`, `TC_*`, `SCAN`, `AUTO_START`, `GET_STATE`,
+`FORCE_PRESENT`...). L'outil unique pour valider le breadboard.
 
 ```
 python/.venv/bin/python python/control_panel.py [port]
