@@ -54,9 +54,6 @@ bool dispatchTrackControllerCommand(char* tokens[], uint8_t count) {
   } else if (strcmp(tokens[0], "TC_LATCH") == 0) {
     TrackController::latch();
     Serial.println("OK");
-  } else if (strcmp(tokens[0], "TC_RELEASE_LATCH") == 0) {
-    TrackController::releaseLatch();
-    Serial.println("OK");
   } else if (strcmp(tokens[0], "TC_END") == 0) {
     TrackController::endTransaction();
     Serial.println("OK");

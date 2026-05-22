@@ -5,6 +5,11 @@ namespace {
 constexpr uint8_t POWER_FLAG_MASK = 0x80;
 constexpr uint8_t MODULE_ACTIVE_LEVEL = LOW;
 constexpr uint8_t MODULE_INACTIVE_LEVEL = HIGH;
+
+void driveControlLines(uint8_t latchLevel, uint8_t transactionEndLevel) {
+  digitalWrite(PIN_LATCH, latchLevel);
+  digitalWrite(PIN_TRANSACTION_END, transactionEndLevel);
+}
 }
 
 namespace TrackController {
@@ -23,20 +28,15 @@ void setAddress(uint8_t section, bool power) {
 }
 
 void latch() {
-  digitalWrite(PIN_LATCH, MODULE_ACTIVE_LEVEL);
-}
-
-void releaseLatch() {
-  digitalWrite(PIN_LATCH, MODULE_INACTIVE_LEVEL);
+  driveControlLines(MODULE_ACTIVE_LEVEL, MODULE_INACTIVE_LEVEL);
 }
 
 void endTransaction() {
-  digitalWrite(PIN_TRANSACTION_END, MODULE_ACTIVE_LEVEL);
+  driveControlLines(MODULE_INACTIVE_LEVEL, MODULE_ACTIVE_LEVEL);
 }
 
 void releaseAll() {
-  digitalWrite(PIN_LATCH, MODULE_INACTIVE_LEVEL);
-  digitalWrite(PIN_TRANSACTION_END, MODULE_INACTIVE_LEVEL);
+  driveControlLines(MODULE_INACTIVE_LEVEL, MODULE_INACTIVE_LEVEL);
 }
 
 bool senseTrainPresence() {
