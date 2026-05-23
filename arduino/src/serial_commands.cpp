@@ -41,7 +41,6 @@ bool dispatchBasicCommand(char* tokens[], uint8_t count) {
     Serial.println("OK");
   } else if (strcmp(tokens[0], "GET") == 0 && count == 2) {
     uint8_t pin = atoi(tokens[1]);
-    pinMode(pin, INPUT);
     Serial.println(digitalRead(pin) == HIGH ? 1 : 0);
   } else {
     return false;
