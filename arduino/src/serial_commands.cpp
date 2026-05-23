@@ -111,8 +111,8 @@ bool dispatchSectionCommand(char* tokens[], uint8_t count) {
   return true;
 }
 
-bool dispatchCycleCommand(char* tokens[], uint8_t count) {
-  if (strcmp(tokens[0], "AUTO_START") == 0 && count == 3) {
+bool dispatchCycleCommand(char* tokens[], uint8_t numberOfArgumentsPassed) {
+  if (strcmp(tokens[0], "AUTO_START") == 0 && numberOfArgumentsPassed == 3) {
     uint16_t frequencyHz = atoi(tokens[1]);
     int dutyCyclePercent = atoi(tokens[2]);
     if (frequencyHz == 0 || dutyCyclePercent < 0 || dutyCyclePercent > 100) {
