@@ -52,6 +52,34 @@ Le verrou et la fin de transaction sont actifs à l'état bas. Une transaction
 consiste à poser une adresse, pulser le verrou, puis lire le capteur (scan) ou
 laisser le module alimenter la section (énergisation).
 
+### Séquence d'une énergisation
+
+Énergiser la section *N* se fait en trois temps.
+
+**1 — Pose de l'adresse.** Le firmware écrit la valeur `0x80 | N` sur les huit
+broches du bus d'adresse. Les sept bits de poids faible portent le numéro de la
+section ; le bit de poids fort, mis à 1, indique au module qu'il s'agit d'une
+commande d'alimentation et non d'une lecture. Les deux lignes de contrôle —
+verrou et fin de transaction — sont alors au repos, c'est-à-dire à l'état haut.
+
+**2 — Verrou actif.** Le firmware abaisse la ligne de verrou. Sur ce front
+descendant, le module échantillonne le bus d'adresse, reconnaît la commande
+d'alimentation grâce au bit 7, et redirige le courant vers la section *N*. La
+ligne de fin de transaction reste haute pendant tout ce temps : une énergisation
+ne la sollicite jamais — c'est ce qui la distingue d'un scan ou d'une coupure.
+
+**3 — Relâchement.** Le firmware ramène la ligne de verrou à l'état haut. Le
+bus d'adresse reste piloté à `0x80 | N` après cette étape ; la section
+demeure alimentée jusqu'à la prochaine transaction. En pratique, c'est le
+`deenergizeAllSections()` du cycle PWM qui écrit l'adresse `0` (sans le bit
+d'alimentation) et pulse cette fois la ligne de fin de transaction pour
+signaler au module de couper toutes les sections.
+
+Un **scan** suit la même ouverture — pose d'adresse (sans le bit 7) puis
+abaissement du verrou — mais intercale une lecture du capteur de présence avant
+le relâchement, et se termine par un pulse de la ligne de fin de transaction
+qui signale au module que la lecture est terminée.
+
 ---
 
 ## Le firmware Arduino
