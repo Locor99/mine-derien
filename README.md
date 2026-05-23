@@ -48,7 +48,7 @@ Quatre signaux :
 - une entrée **capteur** qui rapporte la présence d'un train dans la section
   sélectionnée.
 
-Le verrou et la fin de transaction sont actifs à l'état bas. Une transaction
+Le verrou et la fin de transaction sont actifs à l'état haut. Une transaction
 consiste à poser une adresse, pulser le verrou, puis lire le capteur (scan) ou
 laisser le module alimenter la section (énergisation).
 
@@ -60,15 +60,15 @@ laisser le module alimenter la section (énergisation).
 broches du bus d'adresse. Les sept bits de poids faible portent le numéro de la
 section ; le bit de poids fort, mis à 1, indique au module qu'il s'agit d'une
 commande d'alimentation et non d'une lecture. Les deux lignes de contrôle —
-verrou et fin de transaction — sont alors au repos, c'est-à-dire à l'état haut.
+verrou et fin de transaction — sont alors au repos, c'est-à-dire à l'état bas.
 
-**2 — Verrou actif.** Le firmware abaisse la ligne de verrou. Sur ce front
-descendant, le module échantillonne le bus d'adresse, reconnaît la commande
+**2 — Verrou actif.** Le firmware élève la ligne de verrou. Sur ce front
+montant, le module échantillonne le bus d'adresse, reconnaît la commande
 d'alimentation grâce au bit 7, et redirige le courant vers la section *N*. La
-ligne de fin de transaction reste haute pendant tout ce temps : une énergisation
+ligne de fin de transaction reste basse pendant tout ce temps : une énergisation
 ne la sollicite jamais — c'est ce qui la distingue d'un scan ou d'une coupure.
 
-**3 — Relâchement.** Le firmware ramène la ligne de verrou à l'état haut. Le
+**3 — Relâchement.** Le firmware ramène la ligne de verrou à l'état bas. Le
 bus d'adresse reste piloté à `0x80 | N` après cette étape ; la section
 demeure alimentée jusqu'à la prochaine transaction. En pratique, c'est le
 `deenergizeAllSections()` du cycle PWM qui écrit l'adresse `0` (sans le bit
@@ -76,7 +76,7 @@ d'alimentation) et pulse cette fois la ligne de fin de transaction pour
 signaler au module de couper toutes les sections.
 
 Un **scan** suit la même ouverture — pose d'adresse (sans le bit 7) puis
-abaissement du verrou — mais intercale une lecture du capteur de présence avant
+élévation du verrou — mais intercale une lecture du capteur de présence avant
 le relâchement, et se termine par un pulse de la ligne de fin de transaction
 qui signale au module que la lecture est terminée.
 
@@ -197,9 +197,8 @@ On valide le firmware sans le module de Roger en simulant ses signaux :
 | D30, D31 | 1 LED + 220 Ω chacune | les lignes de contrôle |
 | D32 | switch entre +5 V et la broche, pull-down 10 kΩ vers GND | le capteur de présence |
 
-> D30 et D31 sont **actives à l'état bas** : LED allumée = ligne au repos, LED
-> éteinte = ligne active. C'est l'inverse de l'intuition. Pour un visuel direct,
-> câbler ces deux LEDs vers +5 V au lieu de GND.
+> D30 et D31 sont **actives à l'état haut** : LED allumée = ligne active, LED
+> éteinte = ligne au repos.
 
 ### 2. Tests sur breadboard
 
@@ -211,8 +210,8 @@ Téléverser le sketch, puis dérouler via `gpio_test.py` :
 | `SET 22 1` … `SET 29 1` | chaque LED du bus s'allume |
 | `GET 32` | suit le switch (0 ouvert / 1 fermé) |
 | `TC_ADDR 5 1` | LEDs D22, D24 et D29 (bit alimentation) allumées |
-| `TC_LATCH` | D30 **s'éteint** (verrou actif) |
-| `TC_RELEASE_ALL` | D30 et D31 allumées (repos) |
+| `TC_LATCH` | D30 **s'allume** (verrou actif) |
+| `TC_RELEASE_ALL` | D30 et D31 éteintes (repos) |
 | `TC_SENSE` | suit le switch |
 | `SCAN 12` | suit le switch |
 | `ENERGIZE 5` | LEDs montrant `0x85` |
@@ -233,7 +232,7 @@ vrais trains — le balayage d'énergisation est trop rapide pour les LEDs.
 1. **Câblage** — remplacer le breadboard par le câble vers le module, selon les
    colonnes `Legacy_signal` / `DB25_pin` de `pin_mapping.csv`. Ajouter une
    résistance série de 1 kΩ sur la ligne du capteur (D32) comme protection.
-2. **Polarités** — vérifier l'hypothèse « actif à l'état bas » de D30/D31. Si le
+2. **Polarités** — vérifier l'hypothèse « actif à l'état haut » de D30/D31. Si le
    module ne réagit pas, inverser `MODULE_ACTIVE_LEVEL` dans `track_controller.cpp`.
 3. **Smoke test** — poser un train sur une section connue, `SCAN <n>` doit
    renvoyer `1`.

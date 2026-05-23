@@ -3,8 +3,8 @@
 
 namespace {
 constexpr uint8_t POWER_FLAG_MASK = 0x80;
-constexpr uint8_t MODULE_ACTIVE_LEVEL = LOW;
-constexpr uint8_t MODULE_INACTIVE_LEVEL = HIGH;
+constexpr uint8_t MODULE_ACTIVE_LEVEL = HIGH;
+constexpr uint8_t MODULE_INACTIVE_LEVEL = LOW;
 
 void driveControlLines(uint8_t latchLevel, uint8_t transactionEndLevel) {
   digitalWrite(PIN_LATCH, latchLevel);
