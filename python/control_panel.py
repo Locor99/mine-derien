@@ -7,6 +7,7 @@ from serial_link import SerialLink, find_arduino_port
 SECTION_COUNT = 37
 GRID_COLUMNS = 8
 POLL_INTERVAL_MS = 200
+CONTINUOUS_SCAN_INTERVAL_MS = 100
 
 DEFAULT_FREQUENCY_HZ = "15"
 DEFAULT_DUTY_PERCENT = "25"
@@ -64,6 +65,7 @@ class ControlPanel:
         self.sections = []
         self.auto_lights = []
         self.auto_running = False
+        self.continuous_scan_running = False
         root.title("Mine Derien — Panneau de commande")
 
         self.status = tk.StringVar(value="Non connecté")
@@ -74,6 +76,7 @@ class ControlPanel:
         self.auto_frequency = tk.StringVar(value=DEFAULT_FREQUENCY_HZ)
         self.auto_duty = tk.StringVar(value=DEFAULT_DUTY_PERCENT)
         self.auto_status = tk.StringVar(value="ARRÊT")
+        self.continuous_scan_button_label = tk.StringVar(value="Scan continu : Démarrer")
 
         self._build_connection_bar(root)
 
@@ -89,6 +92,7 @@ class ControlPanel:
         if port:
             self.connect()
         self.root.after(POLL_INTERVAL_MS, self.poll_auto_state)
+        self.root.after(CONTINUOUS_SCAN_INTERVAL_MS, self.poll_continuous_scan)
 
     def _build_connection_bar(self, parent):
         bar = ttk.Frame(parent)
@@ -112,6 +116,8 @@ class ControlPanel:
         actions.pack(fill="x", padx=8, pady=8)
         ttk.Button(actions, text="Tout désénergiser",
                    command=self.handle_deenergize_all).pack(side="left")
+        ttk.Button(actions, textvariable=self.continuous_scan_button_label,
+                   command=self.toggle_continuous_scan).pack(side="left", padx=(8, 0))
 
         raw = ttk.LabelFrame(tab, text="Pin brute")
         raw.pack(fill="x", padx=8, pady=(0, 8))
@@ -208,6 +214,20 @@ class ControlPanel:
         if reply is not None:
             self.auto_running = False
             self.auto_status.set("ARRÊT")
+
+    def toggle_continuous_scan(self):
+        self.continuous_scan_running = not self.continuous_scan_running
+        self.continuous_scan_button_label.set(
+            "Scan continu : Arrêter" if self.continuous_scan_running
+            else "Scan continu : Démarrer")
+
+    def poll_continuous_scan(self):
+        if self.continuous_scan_running and self.link is not None:
+            for section in range(SECTION_COUNT):
+                reply = self.link.request(f"SCAN {section}")
+                if reply is not None:
+                    self.sections[section].show_presence(reply == "1")
+        self.root.after(CONTINUOUS_SCAN_INTERVAL_MS, self.poll_continuous_scan)
 
     def poll_auto_state(self):
         if self.auto_running and self.link is not None:
