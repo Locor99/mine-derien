@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "cycle.h"
 #include "sections.h"
 #include "serial_commands.h"

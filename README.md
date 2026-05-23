@@ -56,7 +56,7 @@ laisser le module alimenter la section (énergisation).
 
 ## Le firmware Arduino
 
-Dans `arduino/mine_derien/`, en couches :
+Dans `arduino/src/`, en couches :
 
 | Fichier | Rôle |
 |---------|------|
@@ -138,17 +138,21 @@ en argument.
 
 ## Build et exécution
 
+Le firmware est un projet **PlatformIO** dans `arduino/`. Sous CLion, ouvrir
+le dossier `arduino/` avec le plugin PlatformIO ; la ligne de commande marche aussi :
+
 ```
-arduino-cli compile --fqbn arduino:avr:mega arduino/mine_derien
-arduino-cli upload  --fqbn arduino:avr:mega -p /dev/ttyACM0 arduino/mine_derien
+pio run -d arduino                       # compile
+pio run -d arduino -t upload             # téléverse sur le Mega
+pio device monitor -d arduino            # ouvre le moniteur série
 
 python -m venv python/.venv
 python/.venv/bin/pip install -r python/requirements.txt
 python/.venv/bin/python python/control_panel.py
 ```
 
-Le port du Mega se retrouve avec `arduino-cli board list`. Un seul programme à la
-fois peut ouvrir le port : fermer un outil avant d'en lancer un autre. Sous Linux,
+Le port du Mega se retrouve avec `pio device list`. Un seul programme à la fois
+peut ouvrir le port : fermer un outil avant d'en lancer un autre. Sous Linux,
 l'utilisateur doit appartenir au groupe `dialout` pour accéder au port.
 
 ---
