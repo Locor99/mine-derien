@@ -35,6 +35,11 @@ void endTransaction() {
   driveControlLines(MODULE_INACTIVE_LEVEL, MODULE_ACTIVE_LEVEL);
 }
 
+void pulseEndTransaction() {
+  endTransaction();
+  releaseAll();
+}
+
 void releaseAll() {
   driveControlLines(MODULE_INACTIVE_LEVEL, MODULE_INACTIVE_LEVEL);
 }

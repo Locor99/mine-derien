@@ -25,7 +25,7 @@ bool scanSection(uint8_t section) {
   TrackController::latch();
   bool present = TrackController::senseTrainPresence();
   TrackController::releaseAll();
-  TrackController::endTransaction();
+  TrackController::pulseEndTransaction();
   return present;
 }
 
@@ -61,7 +61,8 @@ void deenergizeAllSections() {
   for (uint8_t section = 0; section < SECTION_COUNT; section++) {
     TrackController::setAddress(0, false);
     TrackController::latch();
-    TrackController::endTransaction();
+    TrackController::releaseAll();
+    TrackController::pulseEndTransaction();
   }
 }
 
@@ -77,5 +78,6 @@ void runOverdriveCycle() {
   pulseOverdriveGroup(OVERDRIVE_GROUP_2_END, SECTION_COUNT);
   TrackController::setAddress(0, false);
   TrackController::latch();
-  TrackController::endTransaction();
+  TrackController::releaseAll();
+  TrackController::pulseEndTransaction();
 }
