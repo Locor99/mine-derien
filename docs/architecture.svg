@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1560" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-light" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94A3B8"/>
+    </marker>
+    <linearGradient id="gPy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EFF6FF"/>
+      <stop offset="100%" stop-color="#DBEAFE"/>
+    </linearGradient>
+    <linearGradient id="gMega" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ECFEFF"/>
+      <stop offset="100%" stop-color="#CFFAFE"/>
+    </linearGradient>
+    <linearGradient id="gModule" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FAF5FF"/>
+      <stop offset="100%" stop-color="#EDE9FE"/>
+    </linearGradient>
+    <linearGradient id="gVoie" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ECFDF5"/>
+      <stop offset="100%" stop-color="#D1FAE5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="1560" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="600" y="58" text-anchor="middle" font-size="30" font-weight="700" fill="#0F172A">
+    Mine Derien — Architecture du nouveau système
+  </text>
+  <text x="600" y="86" text-anchor="middle" font-size="15" fill="#64748B">
+    Pilotage du module électronique d'origine par Arduino Mega 2560, observé depuis une UI Python
+  </text>
+
+  <!-- ====================== 1. OPERATEUR ====================== -->
+  <g>
+    <rect x="500" y="120" width="200" height="56" rx="28" fill="#0F172A"/>
+    <text x="600" y="155" text-anchor="middle" font-size="17" font-weight="600" fill="#FFFFFF">Opérateur</text>
+  </g>
+
+  <!-- Arrow operator -> python -->
+  <line x1="600" y1="176" x2="600" y2="218" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ====================== 2. PYTHON ====================== -->
+  <g>
+    <rect x="80" y="220" width="1040" height="200" rx="14" fill="url(#gPy)" stroke="#3B82F6" stroke-width="2"/>
+    <text x="110" y="252" font-size="18" font-weight="700" fill="#1E3A8A">Couche Python — python/</text>
+    <text x="110" y="274" font-size="13" fill="#1E40AF">Outils de commande et d'observation sur PC, communication série USB</text>
+
+    <!-- Three tool boxes -->
+    <g>
+      <rect x="110" y="294" width="290" height="106" rx="10" fill="#FFFFFF" stroke="#3B82F6" stroke-width="1.5"/>
+      <text x="255" y="320" text-anchor="middle" font-size="15" font-weight="700" fill="#1E3A8A">control_panel.py</text>
+      <text x="255" y="343" text-anchor="middle" font-size="12" fill="#334155">UI graphique Tkinter</text>
+      <text x="255" y="362" text-anchor="middle" font-size="12" fill="#334155">Onglet Test : contrôle section/section</text>
+      <text x="255" y="381" text-anchor="middle" font-size="12" fill="#334155">Onglet Auto : cycle + grille temps réel</text>
+    </g>
+
+    <g>
+      <rect x="455" y="294" width="290" height="106" rx="10" fill="#FFFFFF" stroke="#3B82F6" stroke-width="1.5"/>
+      <text x="600" y="320" text-anchor="middle" font-size="15" font-weight="700" fill="#1E3A8A">gpio_test.py</text>
+      <text x="600" y="343" text-anchor="middle" font-size="12" fill="#334155">Console série interactive</text>
+      <text x="600" y="362" text-anchor="middle" font-size="12" fill="#334155">Envoie n'importe quelle commande ASCII</text>
+      <text x="600" y="381" text-anchor="middle" font-size="12" fill="#334155">Outil principal du plan de test</text>
+    </g>
+
+    <g>
+      <rect x="800" y="294" width="290" height="106" rx="10" fill="#FFFFFF" stroke="#3B82F6" stroke-width="1.5"/>
+      <text x="945" y="320" text-anchor="middle" font-size="15" font-weight="700" fill="#1E3A8A">handshake.py</text>
+      <text x="945" y="343" text-anchor="middle" font-size="12" fill="#334155">Vérification de la liaison</text>
+      <text x="945" y="362" text-anchor="middle" font-size="12" fill="#334155">PING → PONG</text>
+      <text x="945" y="381" text-anchor="middle" font-size="12" fill="#334155">Détection automatique du port</text>
+    </g>
+  </g>
+
+  <!-- serial_link.py shared layer -->
+  <g>
+    <rect x="240" y="440" width="720" height="50" rx="10" fill="#1E3A8A"/>
+    <text x="600" y="471" text-anchor="middle" font-size="15" font-weight="600" fill="#FFFFFF">
+      serial_link.py — client série partagé (détection port, encodage ASCII)
+    </text>
+  </g>
+
+  <!-- Lines from tools down to serial_link -->
+  <line x1="255" y1="400" x2="380" y2="440" stroke="#3B82F6" stroke-width="1.5"/>
+  <line x1="600" y1="400" x2="600" y2="440" stroke="#3B82F6" stroke-width="1.5"/>
+  <line x1="945" y1="400" x2="820" y2="440" stroke="#3B82F6" stroke-width="1.5"/>
+
+  <!-- ====================== USB Serial link ====================== -->
+  <g>
+    <line x1="600" y1="490" x2="600" y2="560" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+    <rect x="700" y="500" width="280" height="50" rx="8" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5"/>
+    <text x="840" y="521" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">USB Série · 115200 bauds</text>
+    <text x="840" y="540" text-anchor="middle" font-size="12" fill="#92400E">Protocole ASCII, ligne par ligne</text>
+  </g>
+
+  <!-- ====================== 3. ARDUINO MEGA ====================== -->
+  <g>
+    <rect x="80" y="560" width="1040" height="338" rx="14" fill="url(#gMega)" stroke="#0E7490" stroke-width="2"/>
+    <text x="110" y="592" font-size="18" font-weight="700" fill="#0E7490">Firmware Arduino — arduino/src/ (Mega 2560, PlatformIO)</text>
+    <text x="110" y="614" font-size="13" fill="#155E75">Architecture en couches ; cycle PWM non-bloquant sur micros()</text>
+
+    <!-- Layer: serial_commands -->
+    <g>
+      <rect x="110" y="634" width="980" height="44" rx="8" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.5"/>
+      <text x="130" y="662" font-size="14" font-weight="700" fill="#0E7490">serial_commands</text>
+      <text x="320" y="662" font-size="12" fill="#334155">Parse les commandes ASCII (PING, SCAN, ENERGIZE, AUTO_START, GET_STATE, …) → dispatch</text>
+    </g>
+
+    <!-- Layer: cycle + gating + timing (side by side) -->
+    <g>
+      <rect x="110" y="688" width="318" height="92" rx="8" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.5"/>
+      <text x="130" y="712" font-size="14" font-weight="700" fill="#0E7490">cycle</text>
+      <text x="130" y="734" font-size="12" fill="#334155">Boucle PWM automatique :</text>
+      <text x="130" y="751" font-size="12" fill="#334155">scan → gating → ON → OFF</text>
+      <text x="130" y="768" font-size="12" fill="#334155">→ overdrive. Machine à états.</text>
+    </g>
+
+    <g>
+      <rect x="441" y="688" width="318" height="92" rx="8" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.5"/>
+      <text x="461" y="712" font-size="14" font-weight="700" fill="#0E7490">gating</text>
+      <text x="461" y="734" font-size="12" fill="#334155">Règles d'alimentation :</text>
+      <text x="461" y="751" font-size="12" fill="#334155">zones lentes (1/9), anti-collision</text>
+      <text x="461" y="768" font-size="12" fill="#334155">aux jonctions 8 et 15.</text>
+    </g>
+
+    <g>
+      <rect x="772" y="688" width="318" height="92" rx="8" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.5"/>
+      <text x="792" y="712" font-size="14" font-weight="700" fill="#0E7490">timing</text>
+      <text x="792" y="734" font-size="12" fill="#334155">Fréquence (Hz) + duty (%)</text>
+      <text x="792" y="751" font-size="12" fill="#334155">→ délais ON / OFF (µs)</text>
+      <text x="792" y="768" font-size="12" fill="#334155">utilisés par cycle.</text>
+    </g>
+
+    <!-- Layer: sections -->
+    <g>
+      <rect x="110" y="790" width="980" height="44" rx="8" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.5"/>
+      <text x="130" y="818" font-size="14" font-weight="700" fill="#0E7490">sections</text>
+      <text x="240" y="818" font-size="12" fill="#334155">Opérations par section : scan(n), energize(n), deenergizeAll(), overdrive(n) — orchestre les transactions</text>
+    </g>
+
+    <!-- Layer: track_controller + pins.h -->
+    <g>
+      <rect x="110" y="844" width="700" height="44" rx="8" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.5"/>
+      <text x="130" y="872" font-size="14" font-weight="700" fill="#0E7490">track_controller</text>
+      <text x="290" y="872" font-size="12" fill="#334155">Interface bas niveau : pose adresse, pulse verrou, pulse fin-transaction, lit capteur</text>
+    </g>
+
+    <g>
+      <rect x="820" y="844" width="270" height="44" rx="8" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.5"/>
+      <text x="840" y="872" font-size="14" font-weight="700" fill="#0E7490">pins.h</text>
+      <text x="900" y="872" font-size="12" fill="#334155">Constantes de câblage (D22…D32)</text>
+    </g>
+  </g>
+
+  <!-- ====================== DB25 cable ====================== -->
+  <g>
+    <line x1="600" y1="898" x2="600" y2="970" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="710" y="908" width="380" height="56" rx="8" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5"/>
+    <text x="900" y="930" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">Câble (anciennement DB25 du port parallèle)</text>
+    <text x="900" y="950" text-anchor="middle" font-size="12" fill="#92400E">Bus d'adresse 8 bits · Verrou · Fin transaction · Capteur</text>
+  </g>
+
+  <!-- ====================== 4. MODULE ROGER ====================== -->
+  <g>
+    <rect x="80" y="970" width="1040" height="160" rx="14" fill="url(#gModule)" stroke="#7C3AED" stroke-width="2"/>
+    <text x="110" y="1002" font-size="18" font-weight="700" fill="#5B21B6">Module électronique d'origine (Roger, 2008–2009) — INCHANGÉ</text>
+    <text x="110" y="1024" font-size="13" fill="#5B21B6">Décodage de l'adresse · routage du courant · détection de présence par retour de courant</text>
+
+    <g>
+      <rect x="110" y="1044" width="310" height="70" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5"/>
+      <text x="265" y="1068" text-anchor="middle" font-size="14" font-weight="700" fill="#5B21B6">Décodeur d'adresse</text>
+      <text x="265" y="1090" text-anchor="middle" font-size="12" fill="#334155">Lit le bus sur front du verrou</text>
+      <text x="265" y="1106" text-anchor="middle" font-size="12" fill="#334155">Bit 7 = alimenter / lire</text>
+    </g>
+
+    <g>
+      <rect x="445" y="1044" width="310" height="70" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5"/>
+      <text x="600" y="1068" text-anchor="middle" font-size="14" font-weight="700" fill="#5B21B6">Routage d'alimentation</text>
+      <text x="600" y="1090" text-anchor="middle" font-size="12" fill="#334155">Redirige le 12 V vers la</text>
+      <text x="600" y="1106" text-anchor="middle" font-size="12" fill="#334155">section sélectionnée (Rail B)</text>
+    </g>
+
+    <g>
+      <rect x="780" y="1044" width="310" height="70" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5"/>
+      <text x="935" y="1068" text-anchor="middle" font-size="14" font-weight="700" fill="#5B21B6">Détection de présence</text>
+      <text x="935" y="1090" text-anchor="middle" font-size="12" fill="#334155">Retour de courant via moteur</text>
+      <text x="935" y="1106" text-anchor="middle" font-size="12" fill="#334155">→ ligne capteur (1 bit)</text>
+    </g>
+  </g>
+
+  <!-- Arrow module -> voie -->
+  <line x1="600" y1="1130" x2="600" y2="1188" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="615" y="1162" font-size="12" fill="#475569">12 V commuté · Rail B par section</text>
+
+  <!-- ====================== 5. VOIE ====================== -->
+  <g>
+    <rect x="80" y="1188" width="1040" height="220" rx="14" fill="url(#gVoie)" stroke="#059669" stroke-width="2"/>
+    <text x="110" y="1220" font-size="18" font-weight="700" fill="#065F46">Voie ferrée — 37 sections (indices 0–36) électriquement isolées</text>
+    <text x="110" y="1242" font-size="13" fill="#065F46">Réseau « Mine Derien et Port Rienafer » · réf. MD0809023</text>
+
+    <!-- Rails -->
+    <g>
+      <rect x="110" y="1262" width="980" height="34" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+      <text x="130" y="1284" font-size="13" font-weight="700" fill="#065F46">Rail A</text>
+      <text x="200" y="1284" font-size="12" fill="#334155">12 V constant — alimentation des moteurs</text>
+    </g>
+    <g>
+      <rect x="110" y="1302" width="980" height="34" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+      <text x="130" y="1324" font-size="13" font-weight="700" fill="#065F46">Rail B</text>
+      <text x="200" y="1324" font-size="12" fill="#334155">Relié au module — contrôle PWM, segmenté en 37 sections</text>
+    </g>
+
+    <!-- Sections row -->
+    <g>
+      <text x="110" y="1362" font-size="12" font-weight="700" fill="#065F46">Sections :</text>
+      <g font-size="10" fill="#065F46">
+        <rect x="180" y="1350" width="22" height="18" rx="3" fill="#FFFFFF" stroke="#059669"/>
+        <text x="191" y="1363" text-anchor="middle">0</text>
+        <rect x="206" y="1350" width="22" height="18" rx="3" fill="#FFFFFF" stroke="#059669"/>
+        <text x="217" y="1363" text-anchor="middle">1</text>
+        <rect x="232" y="1350" width="22" height="18" rx="3" fill="#FFFFFF" stroke="#059669"/>
+        <text x="243" y="1363" text-anchor="middle">2</text>
+        <rect x="258" y="1350" width="22" height="18" rx="3" fill="#FFFFFF" stroke="#059669"/>
+        <text x="269" y="1363" text-anchor="middle">3</text>
+        <text x="295" y="1363" font-size="12">…</text>
+        <rect x="320" y="1350" width="22" height="18" rx="3" fill="#FEF3C7" stroke="#D97706"/>
+        <text x="331" y="1363" text-anchor="middle">7</text>
+        <text x="350" y="1363" font-size="11" fill="#92400E">zone lente</text>
+        <rect x="430" y="1350" width="22" height="18" rx="3" fill="#FFE4E6" stroke="#E11D48"/>
+        <text x="441" y="1363" text-anchor="middle">8</text>
+        <text x="460" y="1363" font-size="11" fill="#9F1239">jonction</text>
+        <text x="530" y="1363" font-size="12">…</text>
+        <rect x="555" y="1350" width="22" height="18" rx="3" fill="#FEF3C7" stroke="#D97706"/>
+        <text x="566" y="1363" text-anchor="middle">14</text>
+        <rect x="581" y="1350" width="22" height="18" rx="3" fill="#FFE4E6" stroke="#E11D48"/>
+        <text x="592" y="1363" text-anchor="middle">15</text>
+        <text x="615" y="1363" font-size="12">…</text>
+        <rect x="640" y="1350" width="26" height="18" rx="3" fill="#FFFFFF" stroke="#059669"/>
+        <text x="653" y="1363" text-anchor="middle">36</text>
+      </g>
+    </g>
+
+    <!-- Trains -->
+    <g>
+      <text x="110" y="1395" font-size="12" font-weight="700" fill="#065F46">Trains : </text>
+      <text x="170" y="1395" font-size="12" fill="#334155">le moteur crée le chemin de retour du courant (Rail B → module) → présence détectée</text>
+    </g>
+  </g>
+
+  <!-- ====================== LEGEND / NOTE ====================== -->
+  <g>
+    <rect x="80" y="1430" width="1040" height="110" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="100" y="1456" font-size="13" font-weight="700" fill="#0F172A">Repères</text>
+
+    <rect x="100" y="1470" width="14" height="14" rx="3" fill="#DBEAFE" stroke="#3B82F6"/>
+    <text x="122" y="1482" font-size="12" fill="#334155">Python (PC)</text>
+
+    <rect x="220" y="1470" width="14" height="14" rx="3" fill="#CFFAFE" stroke="#0E7490"/>
+    <text x="242" y="1482" font-size="12" fill="#334155">Firmware Arduino (nouveau)</text>
+
+    <rect x="430" y="1470" width="14" height="14" rx="3" fill="#EDE9FE" stroke="#7C3AED"/>
+    <text x="452" y="1482" font-size="12" fill="#334155">Matériel d'origine — conservé</text>
+
+    <rect x="650" y="1470" width="14" height="14" rx="3" fill="#D1FAE5" stroke="#059669"/>
+    <text x="672" y="1482" font-size="12" fill="#334155">Voie et trains</text>
+
+    <rect x="810" y="1470" width="14" height="14" rx="3" fill="#FEF3C7" stroke="#D97706"/>
+    <text x="832" y="1482" font-size="12" fill="#334155">Interface entre couches</text>
+
+    <text x="100" y="1512" font-size="12" fill="#475569">Ce que ce projet remplace : le PC sous QBasic qui pilotait le module via le port parallèle (hors d'usage).</text>
+    <text x="100" y="1530" font-size="12" fill="#475569">Ce qui reste inchangé : module électronique de Roger, voie, câblage des trains, alimentation 12 V.</text>
+  </g>
+</svg>
