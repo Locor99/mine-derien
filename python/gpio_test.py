@@ -40,7 +40,7 @@ def main():
     port = resolve_port(sys.argv)
     if port is None:
         print("Aucun Arduino détecté. Donne le port en argument :")
-        print("  python gpio_test.py /dev/ttyACM0")
+        print("  python gpio_test.py COM3")
         return 1
 
     print(f"Connexion à {port}...")

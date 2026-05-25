@@ -13,7 +13,7 @@ def main():
     port = resolve_port(sys.argv)
     if port is None:
         print("Aucun Arduino détecté. Donne le port en argument :")
-        print("  python handshake.py /dev/ttyACM0")
+        print("  python handshake.py COM3")
         return 1
 
     print(f"Connexion à {port}...")
