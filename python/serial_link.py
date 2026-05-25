@@ -6,11 +6,23 @@ from serial.tools import list_ports
 DEFAULT_BAUD = 115200
 ARDUINO_RESET_DELAY_SECONDS = 2.0
 
+ARDUINO_USB_VENDOR_IDS = {0x2341, 0x2A03, 0x1A86, 0x0403, 0x10C4}
+ARDUINO_TEXT_KEYWORDS = ("arduino", "ch340", "ch341", "usb-serial", "usb serial", "wch", "ftdi")
+ARDUINO_DEVICE_KEYWORDS = ("ACM", "ttyUSB")
+
+
+def port_looks_like_arduino(port):
+    if port.vid in ARDUINO_USB_VENDOR_IDS:
+        return True
+    description = f"{port.manufacturer or ''} {port.description or ''} {port.product or ''}".lower()
+    if any(keyword in description for keyword in ARDUINO_TEXT_KEYWORDS):
+        return True
+    return any(keyword in port.device for keyword in ARDUINO_DEVICE_KEYWORDS)
+
 
 def find_arduino_port():
     for port in list_ports.comports():
-        manufacturer = port.manufacturer or ""
-        if "Arduino" in manufacturer or "ACM" in port.device or "USB" in port.device:
+        if port_looks_like_arduino(port):
             return port.device
     return None
 
