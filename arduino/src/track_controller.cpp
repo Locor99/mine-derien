@@ -45,7 +45,7 @@ void releaseAll() {
 }
 
 bool senseTrainPresence() {
-  return digitalRead(PIN_TRAIN_SENSE) == HIGH;
+  return digitalRead(PIN_TRAIN_SENSE) == LOW;
 }
 
 }
