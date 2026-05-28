@@ -9,5 +9,5 @@ Address bus,D6,ADDR_BIT6,Adresse section bit 6,8,D28,PORTA.6,OUTPUT,direct,
 Address bus,D7,POWER_FLAG,Drapeau alimentation (0=lecture / 1=energiser),9,D29,PORTA.7,OUTPUT,direct,Bit 7 distingue scan vs alimentation
 Control,C0,LATCH,Verrouille l'adresse et declenche l'action du module,1,D30,PORTC.7,OUTPUT,inverse,Actif a l'etat bas cote module
 Control,C1,TRANSACTION_END,Marque la fin d'une transaction,14,D31,PORTC.6,OUTPUT,inverse,Actif a l'etat bas cote module
-Sensing,S3,TRAIN_SENSE,Detection d'un train dans la section selectionnee,15,D32,PORTC.5,INPUT,direct,Resistance serie 1k recommandee
+Sensing,S3,TRAIN_SENSE,Detection d'un train dans la section selectionnee,15,D32,PORTC.5,INPUT,inverse,Resistance serie 1k recommandee
 Ground,GND,GND,Masse commune,18-25,GND,-,-,-,Tous les retours de masse ensemble vers GND Mega
